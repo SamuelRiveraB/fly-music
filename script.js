@@ -24,9 +24,14 @@ const songs=[
     },
     {
         name: 'jacinto-3',
+        title: 'Goodnight, Disco Queen',
+        artist: 'Jacinto Design'
+    },
+    {
+        name: 'metric-1',
         title: 'Front Row (Remix)',
         artist: 'Metric/Jacinto Design'
-    }
+    },
 ]
 
 function play() {
@@ -50,8 +55,17 @@ function loadSong(song) {
     artist.textContent = song.artist
     audio.src = `music/${song.name}.mp3`
     img.src = `img/${song.name}.jpg`
-
-    progressCont
+    audio.addEventListener('loadedmetadata', () => {
+        const {duration} = audio;
+        const durationMinutes = Math.floor(duration / 60)
+        let durationSeconds = Math.floor(duration % 60) 
+        if (durationSeconds < 10) {
+            durationSeconds = `0${durationSeconds}`
+        }
+        if(durationSeconds) {
+            durationEl.textContent = `${durationMinutes}:${durationSeconds}`
+        }
+    });
 }
 
 let songIndex = 0
@@ -73,7 +87,6 @@ function prevSong() {
         songIndex--
     }
     loadSong(songs[songIndex])
-
     play()
 }
 
@@ -84,14 +97,6 @@ function updateProgressBar(e) {
         const {duration, currentTime}  = e.srcElement
         const progressPercent = (currentTime / duration) * 100
         progress.style.width = `${progressPercent}%`
-        const durationMinutes = Math.floor(duration / 60)
-        let durationSeconds = Math.floor(duration % 60) 
-        if (durationSeconds < 10) {
-            durationSeconds = `0${durationSeconds}`
-        }
-        if(durationSeconds) {
-            durationEl.textContent = `${durationMinutes}:${durationSeconds}`
-        }
         const currentMinutes = Math.floor(currentTime / 60)
         let currentSeconds = Math.floor(currentTime % 60) 
         if (currentSeconds < 10) {
@@ -111,4 +116,5 @@ function setProgressBar(e) {
 prevBtn.addEventListener('click', prevSong)
 nextBtn.addEventListener('click', nextSong)
 audio.addEventListener('timeupdate', updateProgressBar)
+audio.addEventListener('ended', nextSong)
 progressCont.addEventListener('click', setProgressBar)
