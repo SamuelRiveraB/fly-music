@@ -2,6 +2,10 @@ const img = document.querySelector("img")
 const title = document.getElementById("title")
 const artist = document.getElementById("artist")
 const audio = document.querySelector('audio')
+const progressCont = document.getElementById('progress-container')
+const progress = document.getElementById('progress')
+const currentTimeEl = document.getElementById('current-time')
+const durationEl = document.getElementById('duration')
 const prevBtn = document.getElementById('prev')
 const playBtn = document.getElementById('play')
 const nextBtn = document.getElementById('next')
@@ -46,6 +50,8 @@ function loadSong(song) {
     artist.textContent = song.artist
     audio.src = `music/${song.name}.mp3`
     img.src = `img/${song.name}.jpg`
+
+    progressCont
 }
 
 let songIndex = 0
@@ -67,10 +73,42 @@ function prevSong() {
         songIndex--
     }
     loadSong(songs[songIndex])
+
     play()
 }
 
 loadSong(songs[songIndex])
 
+function updateProgressBar(e) {
+    if (isPlaying) {
+        const {duration, currentTime}  = e.srcElement
+        const progressPercent = (currentTime / duration) * 100
+        progress.style.width = `${progressPercent}%`
+        const durationMinutes = Math.floor(duration / 60)
+        let durationSeconds = Math.floor(duration % 60) 
+        if (durationSeconds < 10) {
+            durationSeconds = `0${durationSeconds}`
+        }
+        if(durationSeconds) {
+            durationEl.textContent = `${durationMinutes}:${durationSeconds}`
+        }
+        const currentMinutes = Math.floor(currentTime / 60)
+        let currentSeconds = Math.floor(currentTime % 60) 
+        if (currentSeconds < 10) {
+            currentSeconds = `0${currentSeconds}`
+        }
+        currentTimeEl.textContent = `${currentMinutes}:${currentSeconds}`
+    }
+}
+
+function setProgressBar(e) {
+    const width = this.clientWidth
+    const clickX = e.offsetX
+    const { duration } = audio
+    audio.currentTime = (clickX / width) * duration
+}
+
 prevBtn.addEventListener('click', prevSong)
 nextBtn.addEventListener('click', nextSong)
+audio.addEventListener('timeupdate', updateProgressBar)
+progressCont.addEventListener('click', setProgressBar)
